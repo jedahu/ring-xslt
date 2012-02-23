@@ -11,12 +11,16 @@
   (:import
     [java.net URLDecoder]))
 
+;; ## Bundled stylesheet
+;;
 ;; This library comes with one XSLT stylesheet, here called `static-wrap`. Its
 ;; use is described in the [[Synopsis]] (found also in `README.md`).
 (defn static-wrap
   []
   (slurp (resource "static-wrap.xsl")))
 
+;; ## Output formats
+;;
 ;; Stylesheet output can be either HTML or XML. Any file or resource with a
 ;; `.html` suffix is output as HTML; all others are output as XML.
 
@@ -32,6 +36,8 @@
    :indent "no"
    :encoding "UTF-8"})
 
+;; ## Input locations
+;;
 ;; Input is read from files or from resources. The keyword option `:from`
 ;; decides this: its value can be `:file` or `:resource`.
 
@@ -56,6 +62,8 @@
         (let [r2 (resource p2)]
           (and r2 {:path p2 :data (input-stream r2)}))))))
 
+;; ## Middleware function
+;;
 ;; The middleware function is `wrap-xslt`. In addition to a handler function it
 ;; takes the following arguments:
 ;;
@@ -133,6 +141,8 @@
               (handler req)
               {:status 404 :body "wrap-xslt: 404 not found"})))))))
 
+;; ## Convenience and commandline
+;;
 ;; A 'pre-packaged' `run-server` function wraps [[wrap-xslt]] around either
 ;; `wrap-file` or `wrap-resource` depending on the `:from` option, and serves
 ;; using the ring jetty adapter. It takes the same arguments as `wrap-xslt` plus
