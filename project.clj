@@ -1,4 +1,6 @@
 ;; # Ring XSLT
+;;
+;; *Repository:* <https://github.com/jedahu/ring-xslt>
 (defproject
   ring-xslt "0.1.0-SNAPSHOT"
 
