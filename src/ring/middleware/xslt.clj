@@ -117,12 +117,8 @@
           (not= :get (:request-method req))
           (handler req)
 
-          (and re-process (not (re-find re-process path))
-               (or (not re-pass)
-                   (and re-pass (not (re-find re-pass path)))))
-          {:status 404 :body "wrap-xslt: 404 not found"}
-
-          :else
+          (or (not re-process)
+              (re-find re-process path))
           (if-let [input ((if (= :file (:from opts)) file-input resource-input)
                             (or root "") path (:index opts))]
             (let [html? (re-find #"\.html$" (:path input))
@@ -139,7 +135,13 @@
                   resp)))
             (if (and re-pass (re-find re-pass path))
               (handler req)
-              {:status 404 :body "wrap-xslt: 404 not found"})))))))
+              {:status 404 :body "wrap-xslt: 404 not found"}))
+
+          (and re-pass (re-find re-pass path))
+          (handler req)
+
+          :else
+          {:status 404 :body "wrap-xslt: 404 not found"})))))
 
 ;; ## Convenience and commandline
 ;;
