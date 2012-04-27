@@ -88,9 +88,10 @@
 ;; :  (Pattern) A regular expression denoting which paths are to be processed
 ;;    using the stylesheet. By default, all paths will be.
 ;;
-;; :re-pass
-;; :  (Pattern) A regular expression denoting which paths are to be passed to
-;;    the handler without processing. By default, no paths will be.
+;; :re-block
+;; :  (Pattern) A regular expression denoting which paths are to be blocked
+;;    from processing and from being passed to the handler. By default, all
+;;    paths not processed will be passed to the handler.
 ;;
 ;; :index
 ;; :  (String) A file name to append to directory paths. Default: `nil`.
@@ -105,7 +106,7 @@
 (defn wrap-xslt
   [handler stylesheet root & opts]
   (pr stylesheet root)
-  (let [{:keys [re-process re-pass] :as opts} (apply hash-map opts)
+  (let [{:keys [re-process re-block] :as opts} (apply hash-map opts)
         ss (if (= :static-wrap stylesheet) (static-wrap) stylesheet)
         cache (atom {})
         xslt (compile-xslt ss)]
@@ -116,6 +117,9 @@
         (cond
           (not= :get (:request-method req))
           (handler req)
+
+          (and re-block (re-find re-block path))
+          {:status 404 :body "wrap-xslt: 404 not found"}
 
           (or (not re-process)
               (re-find re-process path))
@@ -133,15 +137,10 @@
                 (if-let [hmime (and html? (or (:html-mime opts) "text/html"))]
                   (assoc resp :headers {"Content-Type" hmime})
                   resp)))
-            (if (and re-pass (re-find re-pass path))
-              (handler req)
-              {:status 404 :body "wrap-xslt: 404 not found"}))
-
-          (and re-pass (re-find re-pass path))
-          (handler req)
+            (handler req))
 
           :else
-          {:status 404 :body "wrap-xslt: 404 not found"})))))
+          (handler req))))))
 
 ;; ## Convenience and commandline
 ;;
@@ -178,7 +177,7 @@
 ;; java -jar ring-xslt-X.X.X-standalone.jar clojure.main \
 ;;   -m ring.middleware.xslt :static-wrap "" \
 ;;   -re-process '\.html$' \
-;;   -re-pass '\.(js|css)$'
+;;   -re-block '\.xml$'
 ;;
 ;; lein run -m ring.middleware.xslt path/to/foo.xsl public \
 ;;   -from file \
@@ -187,12 +186,12 @@
 ;; ~~~~
 (defn -main
   [stylesheet root & args]
-  (let [{:strs [-from -re-process -re-pass -index -cache -html-mime -port]}
+  (let [{:strs [-from -re-process -re-block -index -cache -html-mime -port]}
         (apply hash-map args)
 
         opts [:from (and -from (keyword -from))
               :re-process (and -re-process (re-pattern -re-process))
-              :re-pass (and -re-pass (re-pattern -re-pass))
+              :re-block (and -re-block (re-pattern -re-block))
               :index -index
               :cache? (and -cache (not= "no" -cache))
               :html-mime -html-mime
