@@ -135,7 +135,7 @@
                 (swap! cache assoc path body))
               (let [resp {:status 200 :body body}]
                 (if-let [hmime (and html? (or (:html-mime opts) "text/html"))]
-                  (assoc resp :headers {"Content-Type" hmime})
+                  (assoc resp :headers {"content-type" hmime})
                   resp)))
             (handler req))
 
