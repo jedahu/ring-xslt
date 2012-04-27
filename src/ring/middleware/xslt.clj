@@ -111,9 +111,7 @@
         cache (atom {})
         xslt (compile-xslt ss)]
     (fn [req]
-      (let [path (.substring ^String
-                             (URLDecoder/decode (:uri req) "UTF-8")
-                             1)]
+      (let [path (URLDecoder/decode (:uri req) "UTF-8")]
         (cond
           (not= :get (:request-method req))
           (handler req)
@@ -124,7 +122,7 @@
           (or (not re-process)
               (re-find re-process path))
           (if-let [input ((if (= :file (:from opts)) file-input resource-input)
-                            (or root "") path (:index opts))]
+                            (or root "") (.substring ^String path 1) (:index opts))]
             (let [html? (re-find #"\.html$" (:path input))
                   output (if html? output-html output-xml)
                   body (or (@cache path)
