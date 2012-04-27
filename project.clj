@@ -13,7 +13,7 @@
   ;; dependency resolution fails.
 
   :dependencies
-  [[org.clojure/clojure "1.3.0"]
+  [[org.clojure/clojure "1.4.0"]
    [org.clojars.jedahu/clojure-saxon "0.9.3"]
    [ring/ring-jetty-adapter "1.0.2"]]
 
