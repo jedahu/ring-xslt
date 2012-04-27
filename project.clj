@@ -2,7 +2,7 @@
 ;;
 ;; *Repository:* <https://github.com/jedahu/ring-xslt>
 (defproject
-  ring-xslt "0.1.0"
+  ring-xslt "0.1.1-SNAPSHOT"
 
   :description "Middleware to run selected files through an XSLT stylesheet."
 
